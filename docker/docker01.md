@@ -211,3 +211,138 @@ COMMAND 항목의 '/hello'라는 파일로 ③의 내용을 출력합니다.
 #### 도커 컨테이너, 이미지 삭제하기
 이번에는 생성한 도커 컨테이너와 내려받은 도커 이미지를 삭제해 봅시다.
 다음 명령어를 사용해 hello-world 컨테이너를 삭자할 수 있습니다. 
+
+```bash
+# docker rm <Container Name> (ex. competent_haibt)
+or
+# docker rm <Container ID> (ex. 1500a8204af5)
+```
+
+다음 명령어를 실행해 컨테이너가 삭제된 것을 확인합니다. 
+
+```bash
+# docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+
+컨테이너를 삭제하더라도 도커 이미지는 삭제되지 않습니다. 도커 이미지 삭제는 다음 명령어를 사용합니다.
+
+```bash
+# docker rmi <Docker Image Name> (ex. hello-world)
+or
+# docker rmi <Image ID> (ex. 2cb0d9787c4d)
+```
+
+다음 명령어를 실행해 이미지가 삭제된 것을 확인합니다. 
+
+```bash
+# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+```
+
+#### Nginx 이미지를 사용해 컨테이너 시작하기
+다음으로 Nginx 이미지를 사용해봅니다. 
+우선 Nginx의 도커 이미지를 내려받습니다. 
+
+```bash
+# docker pull nginx
+```
+
+내려받은 Nginx 이미지를 사용해 컨테이너를 실행합니다. 
+
+```bash
+# docker run -d --name nginx-container -p 8181:80 nginx
+```
+
+이제 nginx 컨테이너가 기동됐으므로 8181 포트를 외부에서 접속할 수 있도록 방화벽 설정이 되어 있으면 접속할 수 있습니다. 
+여기서는 curl 명령어를 사용해 nginx 실행 여부를 확인해봅니다. 
+
+```bash
+# curl -v http://127.0.0.1:8181/
+
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to 127.0.0.1 (127.0.0.1) port 8181 (#0)
+> GET / HTTP/1.1
+> Host: 127.0.0.1:8181
+> User-Agent: curl/7.55.1
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< Server: nginx/1.15.2
+< Date: Wed, 29 Aug 2018 07:00:31 GMT
+< Content-Type: text/html
+< Content-Length: 612
+< Last-Modified: Tue, 24 Jul 2018 13:02:29 GMT
+< Connection: keep-alive
+< ETag: "5b572365-264"
+< Accept-Ranges: bytes
+<
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+* Connection #0 to host 127.0.0.1 left intact
+
+```
+
+nginx가 정상적으로 실행된 것을 확인할 수 있습니다. 
+
+다음 컨테이너 실행 옵션입니다. 
+옵션 | 설명
+------------ | -------------
+-d | 컨테이너를 백그라운드로 실행합니다. 이 옵션을 추가하지 않으면 컨테이너 기동 시 실행되는 명령어를 실행한 상태로 남아 있습니다. 예를 들어 명령어 콘솔 출력이 표시된 상태가 되기도 합니다. 
+-name | 컨테이너 이름을 지정합니다. (지정하지 않는 경우 자동으로 이름이 지정됩니다)
+-p | 호스트와 컨테이너간 포트 포워딩 설정. 기본적으로는 '-p <호스트의 포트>:<컨테이너의 포트>' 형식이며 호스트의 포트를 생략하면 자동으로 설정됩니다. 컨테이너는 도커로부터 생성되는 네트워크이기 때문에 이 옵션을 사용하지 않으면 호스트의 IP주소를 통해 컨테이너에서 사용하고 있는 포트에 접속할 수 없습니다.
+
+또한 nginx 이미지는 컨테이너 기동 시에 nginx 프로세스가 실행되기 때문에 컨테이너도 정지하지 않고 실행된 상태가 됩니다. docker ps 명령어로 확인해 보면 STATUS가 'Up'으로 표시됩니다. 
+
+```bash
+# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+67ad9ba2b087        nginx               "nginx -g 'daemon of…"   15 minutes ago      Up 14 minutes       0.0.0.0:8181->80/tcp   nginx-container
+```
+
+컨테이너를 정리하려면 다음 명령어를 실행합니다. 
+
+```bash
+# docker stop nginx-container
+nginx-container
+# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                     PORTS               NAMES
+67ad9ba2b087        nginx               "nginx -g 'daemon of…"   16 minutes ago      Exited (0) 2 seconds ago                       nginx-container
+```
+
+삭제하는 방법은 hello-world와 동일합니다. 
+
+```bash
+# docker rm 67ad9ba2b087
+67ad9ba2b087
+# docker rmi c82521676580
+...
+Deleted: ...
+```
+
+
+
