@@ -344,6 +344,35 @@ CONTAINER ID        IMAGE               COMMAND                  CREATED        
 ...
 Deleted: ...
 ```
+### 도커 명령어 사용하기 
+CentOS 도커 이미지를 사용해 애플리케이션 서버(Tomcat)을 설치, 기동하면서 도커 명령어를 살펴봅니다. 
 
+#### CentOS 컨테이너 실행
+먼저 CentOS의 도커 이미지를 내려받고 컨테이너를 기동합니다. docker run의 '-v' 옵션은 바로 뒤에 설명합니다. 
 
+```bash
+[호스트 서버]
+# docker pull centos:7
+# mkdir -p /logs001/tomcat-container/logs
+# docker run -it -d -p 18080:8080 -v /logs001/tomcat-container/logs:/share/logs --name tomcat centos:7
+```
+※ '/logs001/tomcat-container/logs'는 임의의 로그 디렉토리 경로입니다. 
 
+#### CentOS 컨테이너에 Tomcat 설치하기
+CentOS 컨테이너가 실행됐으므로 컨테이너 내에 Tomcat을 설치해보겠습니다. 지근 사용하고 있는 CentOS의 도커 이미지는 설치된 패키지가 제한되어 있으므로 필요에 따라 yum 등의 명령어로 설치해야 합니다. 
+
+먼저 Tomcat을 호스트 서버에서 내려받습니다. 
+
+```bash
+[호스트 서버]
+# wget http://mirror.apache-kr.org/tomcat/tomcat-9/v9.0.11/bin/apache-tomcat-9.0.11.tar.gz
+```
+다음 명령어를 사용해 호스트에서 컨테이너로 파일을 복사합니다. 
+
+```bash
+[호스트 서버]
+# docker cp apache-tomcat-9.0.11.tar.gz tomcat:/opt/
+(docker cp <호스트의 파일> <컨테이너 이름>:<컨테이너 내의 복사 대상 디렉토리>)
+```
+
+물론 컨테이너 
