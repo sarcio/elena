@@ -27,15 +27,82 @@ system-release-2-4.amzn2.x86_64
 
 ```
 
-아파치 웹 서버(httpd) 패키지와 yumdownload 명령어를 사용하기 위해 yum-utils 패키지를 설치합니다.
+#### createrepo 패키지 설치
+
+아래의 명령어를 활용하여 createrepo 패키지를 설치합니다.
+
 ```bash
-# yum install httpd
+# yum install createrepo
+# createrepo --version
+createrepo 0.9.9
 ```
+#### yum-util 설치
+
+yumdownload 명령어를 사용하기 위해 yum-utils 패키지를 설치합니다.
+
 ```bash
 # yum install yum-utils
 ```
 
-아래의 명령어를 활용하여 createrepo.noarch 패키지를 설치합니다.
+
+#### 아파치 웹 서버(httpd) 설치 및 기동
+아파치를 설치합니다. 
+```bash
+# yum install httpd
+```
+
+아파치를 시작합니다. 
+```bash
+# systemctl start httpd
+```
+
+정상 서비스 여부를 확인합니다 
+```bash
+# lsof -i:80 -P
+COMMAND  PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+httpd   5014   root    4u  IPv6  23534      0t0  TCP *:80 (LISTEN)
+httpd   5047 apache    4u  IPv6  23534      0t0  TCP *:80 (LISTEN)
+httpd   5049 apache    4u  IPv6  23534      0t0  TCP *:80 (LISTEN)
+httpd   5050 apache    4u  IPv6  23534      0t0  TCP *:80 (LISTEN)
+httpd   5051 apache    4u  IPv6  23534      0t0  TCP *:80 (LISTEN)
+httpd   5052 apache    4u  IPv6  23534      0t0  TCP *:80 (LISTEN)
+
+```
+
+리포지토리 용도의 디렉터리를 생성합니다. 
+```bash
+# mkdir /var/www/html/repo
+```
+
+리포지토리를 생성합니다. 
+```bash
+]# createrepo --database /var/www/html/repo/
+Saving Primary metadata
+Saving file lists metadata
+Saving other metadata
+Generating sqlite DBs
+Sqlite DBs complete
+
+```
+
+리포지토리 디렉터리로 이동하고 repodata 디렉터리가 생성된 것을 확인합니다. 
+```bash
+# cd /var/www/html/repo/
+# pwd
+/var/www/html/repo
+# ls -F
+repodata/
+```
+
+테스트 용도 rpm 패키지를 다운로드 합니다. 
+```bash
+# yumdownloader --disablerepo=* --enablerepo=base bc
+```
+
+
+
+
+아래의 명령어를 활용하여 createrepo 패키지를 설치합니다.
 
 ```bash
 # yum install createrepo
@@ -54,28 +121,8 @@ createrepo 0.9.9
 # mkdir -p /opt/repo
 ```
 
-#### 아파치 설치 및 디렉터리 연결
+#### repo 파일 생성 
 ```bash
 # yum install httpd
 ```
 
-우선 yum-util과 devicemapper 패키지를 설치합니다. 
-(Amazon Linux 2는 이미 설치되어 있습니다) 
-
-```bash
-# yum install -y yum-utils \
-  device-mapper-persistent-data \
-  lvm2
-```
-
-Docker CE를 설치하기 위해 Docker CE yum 리포지토리를 추가합니다. 
-
-```bash
-# yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-    
-Loaded plugins: extras_suggestions, langpacks, priorities, update-motd
-adding repo from: https://download.docker.com/linux/centos/docker-ce.repo
-grabbing file https://download.docker.com/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
-repo saved to /etc/yum.repos.d/docker-ce.repo
