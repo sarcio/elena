@@ -1,5 +1,5 @@
 
-## YUM 리포지토리 만들기 
+## [AWS Linux2] YUM 리포지토리 만들기 
 Amazon 클라우드 상의 소프트웨어 배포를 위한 YUM Repository를 구축하는 방법을 설명합니다.
 Yum은 레드햇 계열의 리눅스에서 소프트웨어를 배포하기 위한 방법으로 rpmbuild를 활용하여 구축을 할 경우 손쉽게 대상 서버들로 배포하는 것이 가능합니다.
 
@@ -76,7 +76,7 @@ httpd   5052 apache    4u  IPv6  23534      0t0  TCP *:80 (LISTEN)
 
 리포지토리를 생성합니다. 
 ```bash
-]# createrepo --database /var/www/html/repo/
+# createrepo --database /var/www/html/repo/
 Saving Primary metadata
 Saving file lists metadata
 Saving other metadata
@@ -98,9 +98,6 @@ repodata/
 ```bash
 # yumdownloader --disablerepo=* --enablerepo=base bc
 ```
-
-
-
 
 아래의 명령어를 활용하여 createrepo 패키지를 설치합니다.
 
@@ -124,5 +121,107 @@ createrepo 0.9.9
 #### repo 파일 생성 
 ```bash
 # yum install httpd
+```
+
+## [CentOS] YUM 리포지토리 만들기 
+CentOS에서 소프트웨어 배포를 위한 YUM Repository를 구축하는 방법을 설명합니다.
+
+### YUM repository 구축을 위한 createrepo 패키지 설치
+
+#### 설치 환경 확인 
+
+```bash
+# cat /etc/*-release | uniq
+CentOS Linux release 7.0.1406 (Core)
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CentOS Linux release 7.0.1406 (Core)
+
+# rpm -qa *-release
+centos-release-7-0.1406.el7.centos.2.3.x86_64
+
+```
+
+#### createrepo 패키지 설치
+
+```bash
+# yum install createrepo
+# createrepo --version
+createrepo 0.9.9
+```
+#### yum-util 설치
+
+```bash
+# yum install yum-utils
+```
+
+#### 아파치 설정
+
+```bash
+# mkdir -p /var/www/html/repo
+```
+
+리포지토리를 생성합니다. 
+```bash
+# createrepo --database /var/www/html/repo/
+Saving Primary metadata
+Saving file lists metadata
+Saving other metadata
+Generating sqlite DBs
+Sqlite DBs complete
+```
+패키지 다운로드
+```bash
+# rpm -qa|grep -v ^gpg-pubkey|sudo xargs -L3 -P5 yumdownloader --cacheonly --
+```
+
+아파치 환경 설정
+
+```bash
+# sudoedit /etc/httpd/conf/httpd.conf
+...
+Alias /yum /var/www/html/repo
+<Directory /var/www/html/repo>
+    Options +Indexes
+    Order allow,deny
+    Allow from all
+</Directory>
+...
+```
+아파치 재가동해 설정을 반영한다.
+
+### YUM repository 접속을 위한 서버 설정
+
+#### 생성한 리포지토리에 접속하기 
+yum 리포지토르를 사용하는 측에서는 /etc/yum.repos.d/에 리포지토리 설정 파일을 작성한다.
+여기서 리포지토리 이름은 'local'로 지정했다. 
+
+
+```bash
+# sudoedit /etc/yum.repos.d/local.repo
+...
+[local]
+name=local
+baseurl=http://211.254.212.xxx/yum
+gpgcheck=0
+priority=1
+...
+```
+priority=1로 지정하여 local 리포지토리를 우선 순위를 최우선으로 설정하고 있다. priority에 대해서는 뒤에 설명을 추가한다. 
+
+yum update를 하면 local 리포지토리에서 최신 패키지를 다운로드한다. 
+
+```bash
+# yum check-update
+# yum update
 ```
 
