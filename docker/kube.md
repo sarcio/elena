@@ -121,3 +121,22 @@ https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
 kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
 kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
 ```
+
+### deploy 스크립트
+
+```bash
+wget https://k8s.io/examples/application/deployment.yaml
+kubectl apply -f deployment.yaml
+kubectl describe deployment nginx-deployment
+kubectl get pods -l app=nginx
+
+wget https://k8s.io/examples/application/deployment-update.yaml
+kubectl apply -f deployment-update.yaml
+kubectl describe deployment nginx-deployment
+kubectl get pods -l app=nginx
+
+wget https://k8s.io/examples/application/deployment-scale.yaml
+kubectl apply -f deployment-update.yaml
+kubectl describe deployment nginx-deployment
+kubectl get pods -l app=nginx
+```
